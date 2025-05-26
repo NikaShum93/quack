@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Пузырики</title>
+  <title>Пузырики-утята</title>
   <style>
     html, body {
       margin: 0;
@@ -14,8 +14,8 @@
       position: absolute;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
       pointer-events: auto;
       overflow: hidden;
       z-index: 1;
@@ -40,8 +40,9 @@
   const root = document.getElementById('bubble-extension');
   const urlParams = new URLSearchParams(window.location.search);
   const finalText = decodeURIComponent(urlParams.get('final') || '🎉 Well Done!');
-  const bubbleImg = decodeURIComponent(urlParams.get('img') || 'https://media.tenor.com/mqvTrVZEMxIAAAAi/bubble-bfdi.gif');
-  const isCustomImg = bubbleImg !== 'https://media.tenor.com/mqvTrVZEMxIAAAAi/bubble-bfdi.gif';
+  // Гифка-утята всегда вместо пузырей
+  const bubbleImg = 'https://media.tenor.com/_-Y9OYD_cWwAAAAi/duck-bwong.gif';
+  const isCustomImg = true;
 
   const TASKS = {};
   for (let [key, value] of urlParams.entries()) {
@@ -55,6 +56,8 @@
   let popped = 0;
   let finalUnlocked = false;
   const bubbles = [];
+
+  const BUBBLE_SIZE = 80;
 
   const counter = document.createElement('div');
   counter.innerHTML = `🫧 <strong>0 / ${total}</strong>`;
@@ -74,24 +77,32 @@
   });
   root.appendChild(counter);
 
+  // Корректно вычисляет ширину/высоту контейнера даже при resize
+  function getRootSize() {
+    return {
+      width: root.clientWidth || window.innerWidth,
+      height: root.clientHeight || window.innerHeight
+    };
+  }
+
   for (let i = 1; i <= total; i++) {
     const el = document.createElement('img');
     el.src = bubbleImg;
     el.style.opacity = isCustomImg ? '1' : '0.6';
     Object.assign(el.style, {
       position: 'absolute',
-      width: '80px',
-      height: '80px',
+      width: BUBBLE_SIZE + 'px',
+      height: BUBBLE_SIZE + 'px',
       pointerEvents: 'auto',
       cursor: 'pointer',
       zIndex: 100,
       transition: 'transform 0.2s ease'
     });
 
-    const maxW = root.clientWidth - 80;
-    const maxH = root.clientHeight - 80;
-    el.style.left = Math.random() * maxW + 'px';
-    el.style.top  = Math.random() * maxH + 'px';
+    // Располагаем утёнка только в пределах контейнера!
+    const { width: maxW, height: maxH } = getRootSize();
+    el.style.left = (Math.random() * (maxW - BUBBLE_SIZE)) + 'px';
+    el.style.top  = (Math.random() * (maxH - BUBBLE_SIZE)) + 'px';
 
     const dx = (Math.random()*2 - 1) * 1.5;
     const dy = (Math.random()*2 - 1) * 1.5;
@@ -99,7 +110,7 @@
     bubbles.push(bubble);
 
     el.addEventListener('click', () => {
-      const popSound = new Audio('https://nikashum93.github.io/quack/pop.mp3');
+      const popSound = new Audio('https://nikashum93.github.io/quack/pop.mp3?v=2');
       popSound.play().catch(() => {});
       el.remove();
       showMessage(i);
@@ -133,17 +144,35 @@
     root.appendChild(el);
   }
 
-  function animate() {
-    const W = root.clientWidth;
-    const H = root.clientHeight;
+  // Если меняется размер окна/iframe — не даём утятам убегать!
+  window.addEventListener('resize', () => {
+    const { width: W, height: H } = getRootSize();
     for (const b of bubbles) {
       if (!b.el.parentNode) continue;
-      let x = b.el.offsetLeft + b.dx;
-      let y = b.el.offsetTop  + b.dy;
+      let x = parseFloat(b.el.style.left) || 0;
+      let y = parseFloat(b.el.style.top) || 0;
+      if (x > W - BUBBLE_SIZE) b.el.style.left = (W - BUBBLE_SIZE) + 'px';
+      if (y > H - BUBBLE_SIZE) b.el.style.top = (H - BUBBLE_SIZE) + 'px';
+    }
+  });
 
-      if (x < 0 || x > W - 80) b.dx = -b.dx + (Math.random() - 0.5) * 0.4;
-      if (y < 0 || y > H - 80) b.dy = -b.dy + (Math.random() - 0.5) * 0.4;
+  function animate() {
+    const { width: W, height: H } = getRootSize();
+    for (const b of bubbles) {
+      if (!b.el.parentNode) continue;
+      let x = parseFloat(b.el.style.left) || 0;
+      let y = parseFloat(b.el.style.top)  || 0;
 
+      x += b.dx;
+      y += b.dy;
+
+      // Не даём утёнку убежать за пределы!
+      if (x < 0) { x = 0; b.dx = -b.dx + (Math.random() - 0.5) * 0.4; }
+      if (x > W - BUBBLE_SIZE) { x = W - BUBBLE_SIZE; b.dx = -b.dx + (Math.random() - 0.5) * 0.4; }
+      if (y < 0) { y = 0; b.dy = -b.dy + (Math.random() - 0.5) * 0.4; }
+      if (y > H - BUBBLE_SIZE) { y = H - BUBBLE_SIZE; b.dy = -b.dy + (Math.random() - 0.5) * 0.4; }
+
+      // Минимальная подвижность, чтобы не залипали
       if (Math.abs(b.dx) < 0.3) b.dx += (Math.random() - 0.5) * 0.5;
       if (Math.abs(b.dy) < 0.3) b.dy += (Math.random() - 0.5) * 0.5;
 
