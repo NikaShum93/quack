@@ -136,7 +136,7 @@
         .map(i => i.value.trim()).filter(v => v.length > 0);
 
       const taskParams = tasks.map((task, index) => `task${index+1}=${encodeURIComponent(task)}`).join('&');
-      const url = `https://nikashum93.github.io/pusyriki/index.html?${taskParams}&img=${img}&final=${feedback}`;
+      const url = `https://nikashum93.github.io/quack/index.html?${taskParams}&img=${img}&final=${feedback}`;
 
       const iframeCode = `<iframe style="width: 1280px; height: 720px; border: none;" src="${url}" scrolling="no" allowfullscreen></iframe>`;
 
