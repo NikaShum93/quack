@@ -88,7 +88,7 @@ const isCustomImg = !!urlParams.get('img');
   for (let i = 1; i <= total; i++) {
     const el = document.createElement('img');
     el.src = bubbleImg;
-    el.style.opacity = isCustomImg ? '1' : '0.6';
+    el.style.opacity = isCustomImg ? '1' : '1';
     Object.assign(el.style, {
       position: 'absolute',
       width: BUBBLE_SIZE + 'px',
