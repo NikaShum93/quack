@@ -41,8 +41,8 @@
   const urlParams = new URLSearchParams(window.location.search);
   const finalText = decodeURIComponent(urlParams.get('final') || '🎉 Well Done!');
   // Гифка-утята всегда вместо пузырей
-  const bubbleImg = 'https://media.tenor.com/_-Y9OYD_cWwAAAAi/duck-bwong.gif';
-  const isCustomImg = true;
+  const bubbleImg = decodeURIComponent(urlParams.get('img') || 'https://media.tenor.com/_-Y9OYD_cWwAAAAi/duck-bwong.gif');
+const isCustomImg = !!urlParams.get('img');
 
   const TASKS = {};
   for (let [key, value] of urlParams.entries()) {
