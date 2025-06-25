@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Пузырики by Nika Shum & КГБ</title>
+  <title>Пузырики — расширение КГБ</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
 
@@ -14,15 +14,18 @@
       margin: auto;
       color: #fff;
     }
+
     .logo {
       display: flex;
       justify-content: center;
       margin-bottom: 16px;
     }
+
     .logo img {
       width: 80px;
       animation: glow 3s infinite ease-in-out;
     }
+
     @keyframes glow {
       0% { filter: drop-shadow(0 0 0px #0ff); }
       50% { filter: drop-shadow(0 0 12px #ff00cc); }
@@ -44,7 +47,8 @@
       color: #f0f0f0;
     }
 
-    input[type="text"] {
+    input[type="text"],
+    textarea {
       width: 100%;
       padding: 10px;
       margin-bottom: 6px;
@@ -53,6 +57,12 @@
       border-radius: 6px;
       color: #0ff;
       box-shadow: 0 0 6px #0ff inset;
+    }
+
+    textarea {
+      min-height: 180px;
+      resize: vertical;
+      font-family: monospace;
     }
 
     button {
@@ -67,10 +77,6 @@
       cursor: pointer;
       text-shadow: 0 0 4px #000;
       box-shadow: 0 0 10px #ff00cc;
-    }
-
-    #tasks-container input {
-      margin-bottom: 4px;
     }
 
     #output {
@@ -96,7 +102,7 @@
   <div class="logo">
     <img src="https://nikashum93.github.io/pusyriki/assets/kgb-logo.png" alt="KGB">
   </div>
-  <h1>Пузырики by Nika Shum & КГБ</h1>
+  <h1>Пузырики — расширение КГБ</h1>
 
   <label>Изображение пузыря (URL)</label>
   <input type="text" id="bubbleImg" placeholder="https://...">
@@ -104,9 +110,11 @@
   <label>Финальный фидбек</label>
   <input type="text" id="finalText" placeholder="🎉 Well done!">
 
-  <label>Задания</label>
-  <div id="tasks-container"></div>
-  <button onclick="addTask()">+ Добавить задание</button>
+  <label>Задания (по одному на строку)</label>
+  <textarea id="tasksArea" placeholder="Например:
+Скажи три цвета
+Назови пять животных
+Придумай предложение с 'can'"></textarea>
 
   <button onclick="generateCode()">🔮 Скопировать код для Genially</button>
 
@@ -114,26 +122,11 @@
   <small>© Корпорация Геймификации Будущего</small>
 
   <script>
-    let taskCount = 0;
-    const maxTasks = 20;
-
-    function addTask(text = '') {
-      if (taskCount >= maxTasks) return;
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.placeholder = `Задание ${taskCount + 1}`;
-      input.value = text;
-      document.getElementById('tasks-container').appendChild(input);
-      taskCount++;
-    }
-
-    for (let i = 0; i < 10; i++) addTask();
-
     function generateCode() {
       const img = encodeURIComponent(document.getElementById('bubbleImg').value);
       const feedback = encodeURIComponent(document.getElementById('finalText').value);
-      const tasks = Array.from(document.querySelectorAll('#tasks-container input'))
-        .map(i => i.value.trim()).filter(v => v.length > 0);
+      const rawTasks = document.getElementById('tasksArea').value.trim().split('\n');
+      const tasks = rawTasks.map(t => t.trim()).filter(t => t.length > 0);
 
       const taskParams = tasks.map((task, index) => `task${index+1}=${encodeURIComponent(task)}`).join('&');
       const url = `https://nikashum93.github.io/quack/index.html?${taskParams}&img=${img}&final=${feedback}`;
